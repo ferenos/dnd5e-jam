@@ -163,6 +163,20 @@ export default class Item5e extends Item {
   }
 
   /* -------------------------------------------- */
+
+  /**
+   * Should this item's active effects be suppressed.
+   * @type {boolean}
+   */
+  get areEffectsSuppressed() {
+    const requireEquipped = (this.data.type !== "consumable") || ["rod", "trinket", "wand"].includes(
+      this.data.data.consumableType);
+    if ( requireEquipped && (this.data.data.equipped === false) ) return true;
+
+    return this.data.data.attunement === CONFIG.DND5E.attunementTypes.REQUIRED;
+  }
+
+  /* -------------------------------------------- */
   /*  Data Preparation                            */
   /* -------------------------------------------- */
 
@@ -267,7 +281,7 @@ export default class Item5e extends Item {
    */
   prepareFinalAttributes() {
     // Proficiency
-    this.data.data.prof = new Proficiency(this.actor?.data.data.prof, this.data.data.proficient);
+    this.data.data.prof = new Proficiency(this.actor?.data.data.attributes.prof, this.data.data.proficient);
 
     if ( this.data.data.hasOwnProperty("actionType") ) {
       // Ability checks
@@ -344,7 +358,7 @@ export default class Item5e extends Item {
   /**
    * Update a label to the Item detailing its total to hit bonus.
    * Sources:
-   * - item entity's innate attack bonus
+   * - item document's innate attack bonus
    * - item's actor's proficiency bonus if applicable
    * - item's actor's global bonuses to the given item type
    * - item's ammunition if applicable
@@ -413,8 +427,8 @@ export default class Item5e extends Item {
   /**
    * Retrieve an item's critical hit threshold. Uses the smallest value from among the
    * following sources:
-   * - item entity
-   * - item entity's actor (if it has one)
+   * - item document
+   * - item document's actor (if it has one)
    * - the constant '20'
    *
    * @returns {number|null}  The minimum value that must be rolled to be considered a critical hit.
@@ -723,7 +737,7 @@ export default class Item5e extends Item {
    * Display the chat card for an Item as a Chat Message
    * @param {object} [options]                Options which configure the display of the item chat card
    * @param {string} [options.rollMode]       The message visibility mode to apply to the created card
-   * @param {boolean} [options.createMessage] Whether to automatically create a ChatMessage entity (if true), or only
+   * @param {boolean} [options.createMessage] Whether to automatically create a ChatMessage document (if true), or only
    *                                          return the prepared message data (if false)
    * @returns {ChatMessage|object} Chat message if `createMessage` is true, otherwise an object containing message data.
    */
@@ -1049,11 +1063,11 @@ export default class Item5e extends Item {
       parts: parts,
       title: title,
       flavor: this.labels.damageTypes.length ? `${title} (${this.labels.damageTypes})` : title,
-      speaker: ChatMessage.getSpeaker({actor: this.actor}),
       dialogOptions: {
         width: 400,
         top: event ? event.clientY - 80 : null,
-        left: window.innerWidth - 710
+        left: window.innerWidth - 710,
+        speaker: ChatMessage.getSpeaker({actor: this.actor})
       },
       messageData: messageData
     };
@@ -1200,7 +1214,7 @@ export default class Item5e extends Item {
     const title = `${this.name} - ${game.i18n.localize("DND5E.OtherFormula")}`;
 
     // Invoke the roll and submit it to chat
-    const roll = new Roll(rollData.item.formula, rollData).roll();
+    const roll = await new Roll(rollData.item.formula, rollData).roll({async: true});
     roll.toMessage({
       speaker: ChatMessage.getSpeaker({actor: this.actor}),
       flavor: title,
@@ -1221,7 +1235,7 @@ export default class Item5e extends Item {
     if ( !data.recharge.value ) return;
 
     // Roll the check
-    const roll = new Roll("1d6").roll();
+    const roll = await new Roll("1d6").roll({async: true});
     const success = roll.total >= parseInt(data.recharge.value);
 
     // Display a Chat Message
@@ -1436,7 +1450,7 @@ export default class Item5e extends Item {
   /**
    * Get the Actor which is the author of a chat card
    * @param {HTMLElement} card    The chat card being used
-   * @returns {Actor|null}         The Actor entity or null
+   * @returns {Actor|null}        The Actor document or null
    * @private
    */
   static async _getChatCardActor(card) {
@@ -1458,7 +1472,7 @@ export default class Item5e extends Item {
   /**
    * Get the Actor which is the author of a chat card
    * @param {HTMLElement} card    The chat card being used
-   * @returns {Actor[]}            An Array of Actor entities, if any
+   * @returns {Actor[]}            An Array of Actor documents, if any
    * @private
    */
   static _getChatCardTargets(card) {
@@ -1652,6 +1666,8 @@ export default class Item5e extends Item {
       updates["data.proficient"] = true;
       return updates;
     }
+
+    if ( data.data?.proficient !== undefined ) return updates;
 
     // Some weapon types are always proficient
     const weaponProf = CONFIG.DND5E.weaponProficienciesMap[this.data.data.weaponType];
