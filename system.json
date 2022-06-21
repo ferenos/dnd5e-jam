@@ -2,8 +2,8 @@
   "name": "dnd5e",
   "title": "DnD5e - Fifth Edition System",
   "description": "A system for playing the fifth edition of the worlds most popular role-playing game in the Foundry Virtual Tabletop environment.",
-  "version": "1.6.4",
-  "author": "Atropos",
+  "version": "1.6.5",
+  "author": "Atropos & Jam",
   "scripts": [],
   "esmodules": ["dnd5e.js"],
   "styles": ["dnd5e.css"],
@@ -117,5 +117,5 @@
   "compatibleCoreVersion": "9",
   "url": "https://github.com/ferenos/dnd5e-jam",
   "manifest": "https://raw.githubusercontent.com/ferenos/dnd5e-jam/master/system.json",
-  "download": "https://github.com/ferenos/dnd5e-jam/archive/refs/tags/release-1.6.4.zip"
+  "download": "https://github.com/ferenos/dnd5e-jam/archive/refs/tags/release-1.6.5.zip"
 }
