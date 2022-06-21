@@ -117,5 +117,5 @@
   "compatibleCoreVersion": "9",
   "url": "https://github.com/ferenos/dnd5e-jam",
   "manifest": "https://raw.githubusercontent.com/ferenos/dnd5e-jam/master/system.json",
-  "download": "https://github.com/ferenos/dnd5e-jam/releases/download/release-1.6.4/dnd5e-jam-1.6.4.zip"
+  "download": "https://github.com/ferenos/dnd5e-jam/archive/refs/tags/release-1.6.4.zip"
 }
